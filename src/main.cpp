@@ -105,10 +105,10 @@ int main()
     	  gt_values(3) = vy_gt;
     	  ground_truth.push_back(gt_values);
           
-          //Call ProcessMeasurment(meas_package) for Kalman filter
+          //Call ProcessMeasurement(meas_package) for Kalman filter
     	  ukf.ProcessMeasurement(meas_package);    	  
 
-    	  //Push the current estimated x,y positon from the Kalman filter's state vector
+    	  //Push the current estimated x,y position from the Kalman filter's state vector
 
     	  VectorXd estimate(4);
 
@@ -139,6 +139,11 @@ int main()
           auto msg = "42[\"estimate_marker\"," + msgJson.dump() + "]";
           // std::cout << msg << std::endl;
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
+          cout << ">> Accuracy";
+          cout << left << setw(14) << " | rmse_px -> " << setw(10) << RMSE(0);
+          cout << left << setw(14) << " | rmse_py -> " << setw(10) << RMSE(1);
+          cout << left << setw(14) << " | rmse_vx -> " << setw(10) << RMSE(2);
+          cout << left << setw(14) << " | rmse_vy -> " << setw(10) << RMSE(3) << endl;
 	  
         }
       } else {
