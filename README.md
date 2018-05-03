@@ -18,7 +18,7 @@ Based on the rubric points for accuracy, `RMSE [px, py, vx, vy]` must be less th
 
 > From the rubric:
 >
-> “Your algorithm will be run against Dataset 1 in the simulator which is the same as "[data/obj_pose-laser-radar-synthetic-input.txt]()" in the repository. We'll collect the positions that your algorithm outputs and compare them to ground truth data. Your px, py, vx, and vy RMSE should be less than or equal to the values [.11, .11, 0.52, 0.52].”
+> “Your algorithm will be run against Dataset 1 in the simulator which is the same as "[data/obj_pose-laser-radar-synthetic-input.txt](https://github.com/mhBahrami/Unscented-Kalman-Filter/blob/master/data/obj_pose-laser-radar-synthetic-input.txt)" in the repository. We'll collect the positions that your algorithm outputs and compare them to ground truth data. Your px, py, vx, and vy RMSE should be less than or equal to the values [.11, .11, 0.52, 0.52].”
 
 The obtained accuracy is
 ``` C++
@@ -26,4 +26,4 @@ The obtained accuracy is
 ```
 ## License
 
-[MIT License]().
+[MIT License](https://github.com/mhBahrami/Unscented-Kalman-Filter/blob/master/LICENSE).
