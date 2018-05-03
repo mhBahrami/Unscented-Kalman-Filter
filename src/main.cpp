@@ -1,7 +1,7 @@
 #include <uWS/uWS.h>
 #include <iostream>
 #include "json.hpp"
-#include <math.h>
+#include <cmath>
 #include "ukf.h"
 #include "tools.h"
 
@@ -13,10 +13,10 @@ using json = nlohmann::json;
 // Checks if the SocketIO event has JSON data.
 // If there is data the JSON object in string format will be returned,
 // else the empty string "" will be returned.
-std::string hasData(std::string s) {
+std::string hasData(const std::string &s) {
   auto found_null = s.find("null");
-  auto b1 = s.find_first_of("[");
-  auto b2 = s.find_first_of("]");
+  auto b1 = s.find_first_of('[');
+  auto b2 = s.find_first_of(']');
   if (found_null != std::string::npos) {
     return "";
   }
@@ -47,7 +47,7 @@ int main()
     {
 
       auto s = hasData(std::string(data));
-      if (s != "") {
+      if (!s.empty()) {
       	
         auto j = json::parse(s);
 
@@ -66,7 +66,7 @@ int main()
     	  string sensor_type;
     	  iss >> sensor_type;
 
-    	  if (sensor_type.compare("L") == 0) {
+    	  if (sensor_type == "L") {
       	  		meas_package.sensor_type_ = MeasurementPackage::LASER;
           		meas_package.raw_measurements_ = VectorXd(2);
           		float px;
@@ -76,20 +76,24 @@ int main()
           		meas_package.raw_measurements_ << px, py;
           		iss >> timestamp;
           		meas_package.timestamp_ = timestamp;
-          } else if (sensor_type.compare("R") == 0) {
 
-      	  		meas_package.sensor_type_ = MeasurementPackage::RADAR;
-          		meas_package.raw_measurements_ = VectorXd(3);
-          		float ro;
-      	  		float theta;
-      	  		float ro_dot;
-          		iss >> ro;
-          		iss >> theta;
-          		iss >> ro_dot;
-          		meas_package.raw_measurements_ << ro,theta, ro_dot;
-          		iss >> timestamp;
-          		meas_package.timestamp_ = timestamp;
+          } else if (sensor_type == "R") {
+            meas_package.sensor_type_ = MeasurementPackage::RADAR;
+            meas_package.raw_measurements_ = VectorXd(3);
+            float rho;
+            float theta;
+            float rho_dot;
+            iss >> rho;
+            iss >> theta;
+            iss >> rho_dot;
+            meas_package.raw_measurements_ << rho, theta, rho_dot;
+            iss >> timestamp;
+            meas_package.timestamp_ = timestamp;
           }
+
+//          cout << "===================================[" << sensor_type << "]===================================" << endl;
+//          cout << ">> raw_measurements_:" << endl << meas_package.raw_measurements_ << endl;
+
           float x_gt;
     	  float y_gt;
     	  float vx_gt;
@@ -104,12 +108,12 @@ int main()
     	  gt_values(2) = vx_gt;
     	  gt_values(3) = vy_gt;
     	  ground_truth.push_back(gt_values);
+//    	  cout << ">> gt_values:" << endl << gt_values << endl;
           
           //Call ProcessMeasurement(meas_package) for Kalman filter
     	  ukf.ProcessMeasurement(meas_package);    	  
 
     	  //Push the current estimated x,y position from the Kalman filter's state vector
-
     	  VectorXd estimate(4);
 
     	  double p_x = ukf.x_(0);
@@ -117,13 +121,13 @@ int main()
     	  double v  = ukf.x_(2);
     	  double yaw = ukf.x_(3);
 
-    	  double v1 = cos(yaw)*v;
-    	  double v2 = sin(yaw)*v;
+    	  double v_x = cos(yaw) * v;
+    	  double v_y = sin(yaw) * v;
 
     	  estimate(0) = p_x;
     	  estimate(1) = p_y;
-    	  estimate(2) = v1;
-    	  estimate(3) = v2;
+    	  estimate(2) = v_x;
+    	  estimate(3) = v_y;
     	  
     	  estimations.push_back(estimate);
 
@@ -139,11 +143,17 @@ int main()
           auto msg = "42[\"estimate_marker\"," + msgJson.dump() + "]";
           // std::cout << msg << std::endl;
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
-          cout << ">> Accuracy";
+          cout << "\r>> Accuracy";
+//          cout << left << setw(14) << " |     p_x -> " << setw(10) << p_x;
+//          cout << left << setw(14) << " |     p_y -> " << setw(10) << p_y;
+//          cout << left << setw(14) << " |       v -> " << setw(10) << v;
+//          cout << left << setw(14) << " |     yaw -> " << setw(10) << yaw;
+//          cout << left << setw(14) << " |     v_x -> " << setw(10) << v_x;
+//          cout << left << setw(14) << " |     v_y -> " << setw(10) << v_y;
           cout << left << setw(14) << " | rmse_px -> " << setw(10) << RMSE(0);
           cout << left << setw(14) << " | rmse_py -> " << setw(10) << RMSE(1);
           cout << left << setw(14) << " | rmse_vx -> " << setw(10) << RMSE(2);
-          cout << left << setw(14) << " | rmse_vy -> " << setw(10) << RMSE(3) << endl;
+          cout << left << setw(14) << " | rmse_vy -> " << setw(10) << RMSE(3) << flush;
 	  
         }
       } else {

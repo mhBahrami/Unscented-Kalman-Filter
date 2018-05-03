@@ -26,15 +26,29 @@ class UKF {
   VectorXd Nu_;
   VectorXd x_diff_;
 
-
-  ///* Sigma points matrix in measurement space
+  ///* RADAR Sigma points matrix in measurement space
   MatrixXd Zsig_radar_;
 
-  ///* Mean predicted measurement
+  ///* RADAR Mean predicted measurement
   VectorXd z_pred_radar_;
 
-  ///* Measurement covariance matrix S_
+  ///* RADAR Measurement noise covariance matrix R_
+  MatrixXd R_radar_;
+
+  ///* RADAR Measurement covariance matrix S_
   MatrixXd S_radar_;
+
+  ///* LIDAR Sigma points matrix in measurement space
+  MatrixXd Zsig_lidar_;
+
+  ///* LIDAR Mean predicted measurement
+  VectorXd z_pred_lidar_;
+
+  ///* LIDAR Measurement noise covariance matrix R_
+  MatrixXd R_lidar_;
+
+  ///* LIDAR Measurement covariance matrix S_
+  MatrixXd S_lidar_;
 
 
   /**
@@ -47,7 +61,13 @@ class UKF {
    * Update helper functions
    */
   void PredictRadarMeasurement();
-  void PredictLaserMeasurement();
+  void PredictLidarMeasurement();
+
+  /**
+   * Angle normalization to [-Pi, Pi]
+   * @param angle_in_rad is angle in Radian.
+   */
+  void AngleNormalization(double &angle_in_rad);
 
 
 public:
@@ -103,11 +123,23 @@ public:
   ///* Augmented state dimension
   int n_aug_;
 
-  ///* Measurement dimension, radar can measure r, phi, and r_dot
+  ///* Sigma points dimension
+  int n_sig_;
+
+  ///* Measurement dimension, RADAR can measure r, phi, and r_dot
   int n_z_radar_;
+
+  ///* Measurement dimension, LIDAR can measure px, py
+  int n_z_lidar_;
 
   ///* Sigma point spreading parameter
   double lambda_;
+
+  ///* RADAR NIS
+  double NIS_radar_;
+
+  ///* LIDAR NIS
+  double NIS_lidar_;
 
 
   /**
