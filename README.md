@@ -20,7 +20,7 @@ Based on the rubric points for accuracy, `RMSE [px, py, vx, vy]` must be less th
 >
 > “Your algorithm will be run against Dataset 1 in the simulator which is the same as "[data/obj_pose-laser-radar-synthetic-input.txt](https://github.com/mhBahrami/Unscented-Kalman-Filter/blob/master/data/obj_pose-laser-radar-synthetic-input.txt)" in the repository. We'll collect the positions that your algorithm outputs and compare them to ground truth data. Your px, py, vx, and vy RMSE should be less than or equal to the values [.11, .11, 0.52, 0.52].”
 
-The accuracy has been calculated in 3 different situation.
+The accuracy has been calculated in 3 different situations.
 1. The UKF only uses RADAR sensor measurement data:
    - Set [`use_laser_ = false`](https://github.com/mhBahrami/Unscented-Kalman-Filter/blob/master/src/ukf.cpp#L40) and [`use_radar_ = true`](https://github.com/mhBahrami/Unscented-Kalman-Filter/blob/master/src/ukf.cpp#L43).
    - The accuracy is:
