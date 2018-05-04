@@ -144,12 +144,6 @@ int main()
           // std::cout << msg << std::endl;
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
           cout << "\r>> Accuracy";
-//          cout << left << setw(14) << " |     p_x -> " << setw(10) << p_x;
-//          cout << left << setw(14) << " |     p_y -> " << setw(10) << p_y;
-//          cout << left << setw(14) << " |       v -> " << setw(10) << v;
-//          cout << left << setw(14) << " |     yaw -> " << setw(10) << yaw;
-//          cout << left << setw(14) << " |     v_x -> " << setw(10) << v_x;
-//          cout << left << setw(14) << " |     v_y -> " << setw(10) << v_y;
           cout << left << setw(14) << " | rmse_px -> " << setw(10) << RMSE(0);
           cout << left << setw(14) << " | rmse_py -> " << setw(10) << RMSE(1);
           cout << left << setw(14) << " | rmse_vx -> " << setw(10) << RMSE(2);
