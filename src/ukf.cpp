@@ -177,6 +177,10 @@ void UKF::ProcessMeasurement(const MeasurementPackage &meas_package) {
       x_[0] = THRESHOLD;
       x_[1] = THRESHOLD;
     }
+    // Set weights
+    double perLamNa2 = 0.5 / (lambda_ + n_aug_);
+    weights_.fill(perLamNa2);
+    weights_(0) *= 2 * lambda_;
 
     P_ = MatrixXd::Identity(n_x_, n_x_);
 
@@ -193,8 +197,8 @@ void UKF::ProcessMeasurement(const MeasurementPackage &meas_package) {
    ****************************************************************************/
   ///* Time is measured in seconds.
   ///* Compute the time elapsed between the current and previous measurements
-  double dt = (meas_package.timestamp_ - time_us_) / 1000000.0;	//dt - expressed in seconds
-  this->Prediction(dt);
+  double delta_t = (meas_package.timestamp_ - time_us_) / 1000000.0;	//dt - expressed in seconds
+  this->Prediction(delta_t);
 
   /*****************************************************************************
    *  Update
@@ -283,11 +287,6 @@ void UKF::PredictSigmaPoints(const double &delta_t) {
 }
 
 void UKF::PredictMeanAndCovariance() {
-  // Set weights
-  double perLamNa2 = 0.5 / (lambda_ + n_aug_);
-  weights_.fill(perLamNa2);
-  weights_(0) *= 2 * lambda_;
-
   // Predict state mean
   x_ = Xsig_pred_ * weights_;
 
@@ -295,7 +294,7 @@ void UKF::PredictMeanAndCovariance() {
   P_.fill(0.0);
   for (int i = 0; i < n_sig_; ++i) {
     x_diff_ = Xsig_pred_.col(i) - x_;
-    this->AngleNormalization(x_diff_(3));
+    this->AngleNormalization(&(x_diff_(3)));
 
     P_ += weights_(i) * x_diff_ * x_diff_.transpose();
   }
@@ -335,7 +334,7 @@ void UKF::PredictRadarMeasurement() {
   S_radar_ = R_radar_;
   for (int i = 0; i < n_sig_; ++i) {
     z_diff = Zsig_radar_.col(i) - z_pred_radar_;
-    this->AngleNormalization(z_diff(1));
+    this->AngleNormalization(&(z_diff(1)));
 
     S_radar_ += weights_(i) * z_diff * z_diff.transpose();
   }
@@ -359,9 +358,9 @@ void UKF::PredictLidarMeasurement() {
   }
 }
 
-void UKF::AngleNormalization(double &angle_in_rad) {
-  while (angle_in_rad >  M_PI) angle_in_rad -= 2.0 * M_PI;
-  while (angle_in_rad < -M_PI) angle_in_rad += 2.0 * M_PI;
+void UKF::AngleNormalization(double *angle_in_rad) {
+  while (*angle_in_rad >  M_PI) *angle_in_rad -= 2.0 * M_PI;
+  while (*angle_in_rad < -M_PI) *angle_in_rad += 2.0 * M_PI;
 }
 
 /**
@@ -395,11 +394,11 @@ void UKF::UpdateRadar(const MeasurementPackage &meas_package) {
   VectorXd x_diff = VectorXd(n_x_);
   Tc.fill(0.0);
   for (int i = 0; i < n_sig_; ++i) {
-    z_diff_1 = Zsig_radar_.col(i) - z_pred_radar_;
-    this->AngleNormalization(z_diff_1(1));
-
     x_diff = Xsig_pred_.col(i) - x_;
-    this->AngleNormalization(x_diff(3));
+    this->AngleNormalization(&(x_diff(3)));
+
+    z_diff_1 = Zsig_radar_.col(i) - z_pred_radar_;
+    this->AngleNormalization(&(z_diff_1(1)));
 
     Tc += weights_(i) * x_diff * z_diff_1.transpose();
   }
@@ -410,13 +409,13 @@ void UKF::UpdateRadar(const MeasurementPackage &meas_package) {
 
   // Incoming radar measurement
   VectorXd z = meas_package.raw_measurements_;
+  this->AngleNormalization(&(z(1)));
   VectorXd z_diff_2 = z - z_pred_radar_;
-  this->AngleNormalization(z_diff_2(1));
+  this->AngleNormalization(&(z_diff_2(1)));
 
   // Update state mean and covariance matrix
   x_ += K * z_diff_2;
-  this->AngleNormalization(x_(3));
-  //this->AngleNormalization(x_(4));
+  this->AngleNormalization(&(x_(3)));
 
   P_ -= K * S_radar_ * K.transpose();
 
@@ -442,10 +441,10 @@ void UKF::UpdateLidar(const MeasurementPackage &meas_package) {
   Tc.fill(0.0);
   for (int i = 0; i < n_sig_; ++i) {
     x_diff = Xsig_pred_.col(i) - x_;
-    this->AngleNormalization(x_diff(3));
+    this->AngleNormalization(&(x_diff(3)));
 
     z_diff = Zsig_lidar_.col(i) - z_pred_lidar_;
-    this->AngleNormalization(z_diff(1));
+    this->AngleNormalization(&(z_diff(1)));
 
     Tc += weights_(i) * x_diff * z_diff.transpose();
   }
@@ -459,8 +458,7 @@ void UKF::UpdateLidar(const MeasurementPackage &meas_package) {
 
   // Update state mean and covariance matrix
   x_ +=  K * (z - z_pred_lidar_);
-  this->AngleNormalization(x_(3));
-  //this->AngleNormalization(x_(4));
+  this->AngleNormalization(&(x_(3)));
 
   P_ -=  K * S_lidar_ * K.transpose();
 

@@ -67,7 +67,7 @@ class UKF {
    * Angle normalization to [-Pi, Pi]
    * @param angle_in_rad is angle in Radian.
    */
-  void AngleNormalization(double &angle_in_rad);
+  void AngleNormalization(double *angle_in_rad);
 
 
 public:
