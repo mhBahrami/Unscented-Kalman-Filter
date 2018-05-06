@@ -204,6 +204,11 @@ void UKF::ProcessMeasurement(const MeasurementPackage &meas_package) {
   ///* Time is measured in seconds.
   ///* Compute the time elapsed between the current and previous measurements
   double delta_t = (meas_package.timestamp_ - time_us_) / 1000000.0;	//dt - expressed in seconds
+  // To improve numeric stability on delta_t here and also to avoid it
+  // from being zero, initialize it to a small value like 0.0001
+  if (delta_t == 0.0) {
+    delta_t = 0.0001;
+  }
   this->Prediction(delta_t);
 
   /*****************************************************************************
